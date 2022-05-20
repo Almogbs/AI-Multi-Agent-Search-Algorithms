@@ -1,17 +1,97 @@
 import os
 import argparse
+from time import time
+import re
+import subprocess
 
+from soupsieve import match
 
-studpid_agents = [  "random",
-                    "greedy"]
 
 agents = [  "random",
             "greedy",
             "improvedgreedy",
             "minimax",
-            #"alphabeta",
+            "alphabeta"
             #"expectimax"
             ]
+
+def check_results(agent, rival, agent_score, rival_score, winner):
+    winner = int(winner)
+
+    ## CASE0:  improvedgreedy VS random
+    if agent == "improvedgreedy" and rival == "random":
+        return winner == 0
+
+    #CASE1:  random VS improvedgreedy
+    if agent == "random" and rival == "improvedgreedy":
+        return winner == 1
+    
+    #CASE2:  improvedgreedy VS greedy
+    if agent == "improvedgreedy" and rival == "greedy":
+        return winner == 0
+        
+    #CASE3:  greedy VS improvedgreedy
+    if agent == "greedy" and rival == "improvedgreedy":
+        return winner == 1
+
+    #CASE4:  improvedgreedy VS minimax
+    if agent == "improvedgreedy" and rival == "minimax":
+        return winner == 1
+        
+    #CASE5:  mininax VS improvedgreedy
+    if agent == "minimax" and rival == "improvedgreedy":
+        return winner == 0
+
+    #CASE6:  improvedgreedy VS alphabeta
+    if agent == "improvedgreedy" and rival == "alphabeta":
+        return winner == 1
+        
+    #CASE7:  alphabeta VS improvedgreedy
+    if agent == "alphabeta" and rival == "improvedgreedy":
+        return winner == 0
+
+    #CASE8:  minimax VS greedy
+    if agent == "minimax" and rival == "greedy":
+        return winner == 0
+        
+    #CASE9:  greedy VS minimax
+    if agent == "greedy" and rival == "minimax":
+        return winner == 1
+
+    #CASE10:  minimax VS alphabeta
+    if agent == "minimax" and rival == "alphabeta":
+        return True
+        
+    #CASE11:  alphabeta VS minimax
+    if agent == "alphabeta" and rival == "minimax":
+        return True
+
+    #CASE12:  minimax VS random
+    if agent == "minimax" and rival == "random":
+        return winner == 0
+        
+    #CASE13:  random VS minimax
+    if agent == "random" and rival == "minimax":
+        return winner == 1
+
+    #CASE14:  alphabeta VS greedy
+    if agent == "alphabeta" and rival == "greedy":
+        return winner == 0
+        
+    #CASE15:  greedy VS alphabeta
+    if agent == "greedy" and rival == "alphabeta":
+        return winner == 1
+
+    #CASE15:  alphabeta VS random
+    if agent == "alphabeta" and rival == "random":
+        return winner == 0
+        
+    #CASE17:  random VS alphabeta
+    if agent == "random" and rival == "alphabeta":
+        return winner == 1
+
+    return True
+
 
 def run_tests():
     """
@@ -30,14 +110,38 @@ def run_tests():
     time_limit = 0.5
     seed = 1234
     steps = 1000
+
+    total = 0
+    failed = 0
+
     for agent in agents:
         for rival_agent in agents:
-            if agent != rival_agent and agent not in studpid_agents:
-                print(f"\n\n********* {agent} VS. {rival_agent} *********")
+            total += 1
+            start = time()
+            if agent != rival_agent:
+                print(f"\n\n\n********* {agent} VS. {rival_agent} *********")
                 print(f"seed={seed}, time_limit={time_limit}, step_limit={steps}")
 
-                os.system(f"python main.py {agent} {rival_agent}  -t {time_limit} -s {seed} -c {steps}")
-                print(f"********* END OF TEST *********")
+                res = subprocess.check_output(f"python main.py {agent} {rival_agent}  -t {time_limit} -s {seed} -c {steps}", shell=True)
+                res = res.decode()
+                match = re.findall('[0-9]+', res)
+                
+                # Draw
+                if len(match) == 2:
+                    match.append(2)
+                
+                if check_results(agent, rival_agent, *match):
+                    print("PASS")
+
+                else:
+                    failed += 1
+                    print(res)
+                    print("FAILED")
+
+                print(f"********* END OF TEST (time elapsed:{time()-start}) *********")
+
+    print(f"\nFailed: {failed} out of total: {total}")
+            
 
 
 if __name__ == "__main__":
