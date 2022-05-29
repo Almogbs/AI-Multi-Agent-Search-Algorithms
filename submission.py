@@ -1,13 +1,40 @@
 from time import time
 from Agent import Agent, AgentGreedy
 from TaxiEnv import TaxiEnv, manhattan_distance
-import random
 import sys
 
 
 INF = sys.maxsize
 MINUS_INF = -sys.maxsize - 1
 TIME_BUFF = 0.01
+
+
+def shared_heuristic(env: TaxiEnv, taxi_id: int):
+    taxi = env.get_taxi(taxi_id)
+    other_taxi = env.get_taxi((taxi_id + 1) % 2)
+
+    if taxi.passenger:
+        return 1 + 5*(taxi.cash-other_taxi.cash) - manhattan_distance(taxi.position, taxi.passenger.destination)
+    else:
+        taxi_pos = taxi.position
+        pass_pos = env.passengers[0].position
+        pass_dest = env.passengers[0].destination
+        dist_pass_taxi = manhattan_distance(taxi_pos, pass_pos)
+
+        for passenger in env.passengers:
+            if manhattan_distance(taxi_pos, passenger.position) < dist_pass_taxi:
+                pass_pos = passenger.position
+                pass_dest = passenger.destination
+                dist_pass_taxi = manhattan_distance(taxi_pos, pass_pos)
+        return 5*(taxi.cash-other_taxi.cash) - dist_pass_taxi - manhattan_distance(pass_dest, pass_pos)
+
+
+def get_actual_id(agent_id: int, our_turn: bool):
+    if our_turn:
+        return agent_id
+    else:
+        return (agent_id + 1) % 2
+
 
 
 
@@ -22,30 +49,11 @@ class AgentGreedyImproved(AgentGreedy):
         children_heuristics = [self.heuristic(child, taxi_id) for child in children]
         max_heuristic = max(children_heuristics)            
         index_selected = children_heuristics.index(max_heuristic)
-
         return operators[index_selected]
 
-
     def heuristic(self, env: TaxiEnv, taxi_id: int):
-        taxi = env.get_taxi(taxi_id)
+        return shared_heuristic(env, taxi_id)
 
-        if taxi.passenger:
-
-            return 5*taxi.cash - manhattan_distance(taxi.position, taxi.passenger.destination)
-
-        else:
-            taxi_pos = taxi.position
-            pass_pos = env.passengers[0].position
-            pass_dest = env.passengers[0].destination
-            dist_pass_taxi = manhattan_distance(taxi_pos, pass_pos)
-
-            for passenger in env.passengers:
-                if manhattan_distance(taxi_pos, passenger.position) < dist_pass_taxi:
-                    pass_pos = passenger.position
-                    pass_dest = passenger.destination
-                    dist_pass_taxi = manhattan_distance(taxi_pos, pass_pos)
-
-            return 5*taxi.cash - dist_pass_taxi - manhattan_distance(pass_dest, pass_pos)
 
 
 
@@ -56,55 +64,35 @@ class AgentMinimax(Agent):
     """
     def run_step(self, env: TaxiEnv, agent_id, time_limit):
         end = time()
-        best_res = MINUS_INF
         best_res_op = None
         depth = 0
 
         while time_limit > TIME_BUFF:
             start = time()
-            curr_res, curr_res_op = self.rb_minimax(self, env, agent_id, depth, True, time_limit - TIME_BUFF)
-            if best_res < curr_res:
-                best_res = curr_res
+            _, curr_res_op = self.rb_minimax(self, env, agent_id, depth, True, time_limit - TIME_BUFF, "park")
+
+            if curr_res_op is not None:
                 best_res_op = curr_res_op
 
             depth += 1
             end = time()
             time_limit -= (end-start)
-            
         return best_res_op
-    
 
     def heuristic(self, env: TaxiEnv, taxi_id: int):
-        taxi = env.get_taxi(taxi_id)
-        other_taxi = env.get_taxi((taxi_id + 1) % 2)
-
-        if taxi.passenger:
-
-            return 1 + 5*(taxi.cash-other_taxi.cash) - manhattan_distance(taxi.position, taxi.passenger.destination)
-
-        else:
-            taxi_pos = taxi.position
-            pass_pos = env.passengers[0].position
-            pass_dest = env.passengers[0].destination
-            dist_pass_taxi = manhattan_distance(taxi_pos, pass_pos)
-
-            for passenger in env.passengers:
-                if manhattan_distance(taxi_pos, passenger.position) < dist_pass_taxi:
-                    pass_pos = passenger.position
-                    pass_dest = passenger.destination
-                    dist_pass_taxi = manhattan_distance(taxi_pos, pass_pos)
-
-            return 5*(taxi.cash-other_taxi.cash) - dist_pass_taxi - manhattan_distance(pass_dest, pass_pos)
-
+        return shared_heuristic(env, taxi_id)
 
     @staticmethod
-    def rb_minimax(self, env: TaxiEnv, agent_id: int, depth: int, our_turn: bool, time_limit: float):
+    def rb_minimax(self, env: TaxiEnv, agent_id: int, depth: int, our_turn: bool, time_limit: float, prev_op):
         start = time()
-        operators, children = self.successors(env, self.get_actual_id(agent_id, our_turn))
+        operators, children = self.successors(env, get_actual_id(agent_id, our_turn))
 
-        if depth <= 0 or env.done() or time_limit <= TIME_BUFF:
-            
-            return self.heuristic(env, agent_id), operators[0]
+        if depth <= 0 or env.done() or (time_limit <= TIME_BUFF and depth <= 1):
+            return self.heuristic(env, agent_id), prev_op
+
+        if time_limit <= TIME_BUFF: 
+            return self.heuristic(env, agent_id), None
+
 
         if our_turn:
             curr_max = MINUS_INF
@@ -112,12 +100,11 @@ class AgentMinimax(Agent):
 
             for i, child in enumerate(children):
                 end = time()
-                curr, _ = self.rb_minimax(self, child, agent_id, depth - 1, not our_turn, time_limit - (end-start))
+                curr, _ = self.rb_minimax(self, child, agent_id, depth - 1, not our_turn, time_limit - (end-start), operators[i])
 
                 if curr_max < curr:
                     curr_max = curr
                     curr_max_child = i
-        
             return (curr_max, operators[curr_max_child])
         
         # not our turn
@@ -127,24 +114,15 @@ class AgentMinimax(Agent):
 
             for i, child in enumerate(children):
                 end = time()
-                curr, _ = self.rb_minimax(self, child, agent_id, depth - 1, not our_turn, time_limit - (end-start))
+                curr, _ = self.rb_minimax(self, child, agent_id, depth - 1, not our_turn, time_limit - (end-start), operators[i])
 
                 if curr_min > curr:
                     curr_min = curr
                     curr_min_child = i
-        
             return (curr_min, operators[curr_min_child])
 
 
-    @staticmethod
-    def get_actual_id(agent_id: int, our_turn: bool):
-        if our_turn:
 
-            return agent_id
-
-        else:
-
-            return (agent_id + 1) % 2
 
 
 
@@ -155,15 +133,14 @@ class AgentAlphaBeta(Agent):
     """
     def run_step(self, env: TaxiEnv, agent_id, time_limit):
         end = time()
-        best_res = MINUS_INF
         best_res_op = None
         depth = 0
 
         while time_limit > TIME_BUFF:
             start = time()
-            curr_res, curr_res_op = self.rb_alphabeta(self, env, agent_id, depth, True, time_limit - TIME_BUFF, MINUS_INF, INF)
-            if best_res < curr_res:
-                best_res = curr_res
+            _, curr_res_op = self.rb_alphabeta(self, env, agent_id, depth, True, time_limit - TIME_BUFF, MINUS_INF, INF, "park")
+
+            if curr_res_op is not None:
                 best_res_op = curr_res_op
 
             depth += 1
@@ -172,38 +149,20 @@ class AgentAlphaBeta(Agent):
             
         return best_res_op
     
-
     def heuristic(self, env: TaxiEnv, taxi_id: int):
-        taxi = env.get_taxi(taxi_id)
-        other_taxi = env.get_taxi((taxi_id + 1) % 2)
+        return shared_heuristic(env, taxi_id)
 
-        if taxi.passenger:
-
-            return 1 + 5*(taxi.cash-other_taxi.cash) - manhattan_distance(taxi.position, taxi.passenger.destination)
-
-        else:
-            taxi_pos = taxi.position
-            pass_pos = env.passengers[0].position
-            pass_dest = env.passengers[0].destination
-            dist_pass_taxi = manhattan_distance(taxi_pos, pass_pos)
-
-            for passenger in env.passengers:
-                if manhattan_distance(taxi_pos, passenger.position) < dist_pass_taxi:
-                    pass_pos = passenger.position
-                    pass_dest = passenger.destination
-                    dist_pass_taxi = manhattan_distance(taxi_pos, pass_pos)
-
-            return 5*(taxi.cash-other_taxi.cash) - dist_pass_taxi - manhattan_distance(pass_dest, pass_pos)
 
 
     @staticmethod
-    def rb_alphabeta(self, env: TaxiEnv, agent_id: int, depth: int, our_turn: bool, time_limit: float, alpha: int, beta: int):
+    def rb_alphabeta(self, env: TaxiEnv, agent_id: int, depth: int, our_turn: bool, time_limit: float, alpha: int, beta: int, prev_op):
         start = time()
-        operators, children = self.successors(env, self.get_actual_id(agent_id, our_turn))
+        operators, children = self.successors(env, get_actual_id(agent_id, our_turn))
 
-        if depth <= 0 or env.done() or time_limit <= TIME_BUFF:
-            
-            return self.heuristic(env, agent_id), operators[0]
+        if depth <= 0 or env.done() or (time_limit <= TIME_BUFF and depth <= 1):
+            return self.heuristic(env, agent_id), prev_op
+        if time_limit <= TIME_BUFF: 
+            return self.heuristic(env, agent_id), None
 
         if our_turn:
             curr_max = MINUS_INF
@@ -211,7 +170,7 @@ class AgentAlphaBeta(Agent):
 
             for i, child in enumerate(children):
                 end = time()
-                curr, _ = self.rb_alphabeta(self, child, agent_id, depth - 1, not our_turn, time_limit - (end-start), alpha, beta)
+                curr, _ = self.rb_alphabeta(self, child, agent_id, depth - 1, not our_turn, time_limit - (end-start), alpha, beta, operators[i])
 
                 if curr_max < curr:
                     curr_max = curr
@@ -220,7 +179,6 @@ class AgentAlphaBeta(Agent):
                 alpha = max(alpha, curr_max)
                 if curr_max >= beta:
                     return INF, None
-        
             return (curr_max, operators[curr_max_child])
         
         # not our turn
@@ -230,7 +188,7 @@ class AgentAlphaBeta(Agent):
 
             for i, child in enumerate(children):
                 end = time()
-                curr, _ = self.rb_alphabeta(self, child, agent_id, depth - 1, not our_turn, time_limit - (end-start), alpha, beta)
+                curr, _ = self.rb_alphabeta(self, child, agent_id, depth - 1, not our_turn, time_limit - (end-start), alpha, beta, operators[i])
 
                 if curr_min > curr:
                     curr_min = curr
@@ -239,22 +197,72 @@ class AgentAlphaBeta(Agent):
                 beta = min(beta, curr_min)
                 if curr_min <= alpha:
                     return MINUS_INF, None
-
             return (curr_min, operators[curr_min_child])
 
 
-    @staticmethod
-    def get_actual_id(agent_id: int, our_turn: bool):
-        if our_turn:
-
-            return agent_id
-
-        else:
-
-            return (agent_id + 1) % 2
 
 
 class AgentExpectimax(Agent):
-    # TODO: section d : 1
+    """
+        Expectimax Agent:
+        
+    """
     def run_step(self, env: TaxiEnv, agent_id, time_limit):
-        raise NotImplementedError()
+        end = time()
+        best_res_op = None
+        depth = 0
+
+        while time_limit > TIME_BUFF:
+            start = time()
+            _, curr_res_op = self.rb_expectedmax(self, env, agent_id, depth, True, time_limit - TIME_BUFF, "park")
+            
+            if curr_res_op is not None:
+                best_res_op = curr_res_op
+
+            depth += 1
+            end = time()
+            time_limit -= (end-start)
+        return best_res_op
+
+    def heuristic(self, env: TaxiEnv, taxi_id: int):
+        return shared_heuristic(env, taxi_id)
+
+    @staticmethod
+    def rb_expectedmax(self, env: TaxiEnv, agent_id: int, depth: int, our_turn: bool, time_limit: float, prev_op):
+        start = time()
+        operators, children = self.successors(env, get_actual_id(agent_id, our_turn))
+        
+        if depth <= 0 or env.done() or (time_limit <= TIME_BUFF and depth <= 1):
+            return self.heuristic(env, agent_id), prev_op
+
+        if time_limit <= TIME_BUFF: 
+            return self.heuristic(env, agent_id), None
+
+        if our_turn:
+            curr_max = MINUS_INF
+            curr_max_child = 0
+
+            for i, child in enumerate(children):
+                end = time()
+                curr, _ = self.rb_expectedmax(self, child, agent_id, depth - 1, not our_turn, time_limit - (end-start), operators[i])
+
+                if curr_max < curr:
+                    curr_max = curr
+                    curr_max_child = i
+            return (curr_max, operators[curr_max_child])
+        
+        # not our turn
+        else:
+            vals = []
+            for i, child in enumerate(children):
+                end = time()
+                val, _ = self.rb_expectedmax(self, child, agent_id, depth - 1, not our_turn, time_limit - (end-start), operators[i])
+                vals.append(self.probabilistic(operators[i]) * val)
+            return sum(vals), prev_op
+
+    @staticmethod
+    def probabilistic(op):
+        if op in ["move north", "move south", "move east", "move west"]:
+            return 1/6
+        else:
+            return 2/6

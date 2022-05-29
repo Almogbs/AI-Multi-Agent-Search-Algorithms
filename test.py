@@ -11,8 +11,8 @@ agents = [  "random",
             "greedy",
             "improvedgreedy",
             "minimax",
-            "alphabeta"
-            #"expectimax"
+            "alphabeta",
+            "expectimax"
             ]
 
 def check_results(agent, rival, agent_score, rival_score, winner):
@@ -82,7 +82,7 @@ def check_results(agent, rival, agent_score, rival_score, winner):
     if agent == "greedy" and rival == "alphabeta":
         return winner == 1
 
-    #CASE15:  alphabeta VS random
+    #CASE16:  alphabeta VS random
     if agent == "alphabeta" and rival == "random":
         return winner == 0
         
@@ -90,7 +90,55 @@ def check_results(agent, rival, agent_score, rival_score, winner):
     if agent == "random" and rival == "alphabeta":
         return winner == 1
 
-    return True
+    #CASE18:  random VS greedy
+    if agent == "random" and rival == "greedy":
+        return True
+
+    #CASE19:  greedy VS random
+    if agent == "greedy" and rival == "random":
+        return True
+
+    #CASE20:  expectimax VS random
+    if agent == "expectimax" and rival == "random":
+        return winner == 0
+
+    #CASE21:  expectimax VS greedy
+    if agent == "expectimax" and rival == "greedy":
+        return winner == 0
+
+    #CASE22:  expectimax VS improvedgreedy
+    if agent == "expectimax" and rival == "improvedgreedy":
+        return winner == 0
+
+    #CASE23:  expectimax VS minimax
+    if agent == "expectimax" and rival == "minimax":
+        return winner == 1
+
+    #CASE24:  expectimax VS alphabeta
+    if agent == "expectimax" and rival == "alphabeta":
+        return winner == 0
+
+    #CASE25:  alphabeta VS expectimax
+    if agent == "alphabeta" and rival == "expectimax":
+        return winner == 0
+
+    #CASE26:  minimax VS expectimax
+    if agent == "minimax" and rival == "expectimax":
+        return winner == 0
+
+    #CASE27:  improvedgreedy VS expectimax
+    if agent == "improvedgreedy" and rival == "expectimax":
+        return winner == 0
+
+    #CASE28:  random VS expectimax
+    if agent == "random" and rival == "expectimax":
+        return winner == 1
+
+    #CASE29:  greedy VS expectimax
+    if agent == "greedy" and rival == "expectimax":
+        return winner == 1
+
+    return False
 
 
 def run_tests():
@@ -130,12 +178,12 @@ def run_tests():
                 if len(match) == 2:
                     match.append(2)
                 
+                print(res)
+
                 if check_results(agent, rival_agent, *match):
                     print("PASS")
-
                 else:
                     failed += 1
-                    print(res)
                     print("FAILED")
 
                 print(f"********* END OF TEST (time elapsed:{time()-start}) *********")
