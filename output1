@@ -7,17 +7,17 @@ seed=1234, time_limit=0.5, step_limit=1000
 draw
 
 PASS
-********* END OF TEST (time elapsed:0.06945300102233887) *********
+********* END OF TEST (time elapsed:0.06356406211853027) *********
 
 
 
 ********* random VS. improvedgreedy *********
 seed=1234, time_limit=0.5, step_limit=1000
-[0, 8]
+[0, 16]
 taxi 1 wins!
 
 PASS
-********* END OF TEST (time elapsed:0.061345815658569336) *********
+********* END OF TEST (time elapsed:0.0610198974609375) *********
 
 
 
@@ -27,27 +27,27 @@ seed=1234, time_limit=0.5, step_limit=1000
 taxi 1 wins!
 
 PASS
-********* END OF TEST (time elapsed:8.881113052368164) *********
+********* END OF TEST (time elapsed:9.86523175239563) *********
 
 
 
 ********* random VS. alphabeta *********
 seed=1234, time_limit=0.5, step_limit=1000
-[0, 8]
+[0, 2]
 taxi 1 wins!
 
 PASS
-********* END OF TEST (time elapsed:9.8632071018219) *********
+********* END OF TEST (time elapsed:9.37717866897583) *********
 
 
 
 ********* random VS. expectimax *********
 seed=1234, time_limit=0.5, step_limit=1000
-[0, 6]
+[0, 2]
 taxi 1 wins!
 
 PASS
-********* END OF TEST (time elapsed:8.881664037704468) *********
+********* END OF TEST (time elapsed:8.880438804626465) *********
 
 
 
@@ -57,37 +57,37 @@ seed=1234, time_limit=0.5, step_limit=1000
 draw
 
 PASS
-********* END OF TEST (time elapsed:0.05842304229736328) *********
+********* END OF TEST (time elapsed:0.056317806243896484) *********
 
 
 
 ********* greedy VS. improvedgreedy *********
 seed=1234, time_limit=0.5, step_limit=1000
-[0, 8]
+[0, 10]
 taxi 1 wins!
 
 PASS
-********* END OF TEST (time elapsed:0.058814048767089844) *********
+********* END OF TEST (time elapsed:0.057842254638671875) *********
 
 
 
 ********* greedy VS. minimax *********
 seed=1234, time_limit=0.5, step_limit=1000
-[0, 0]
-draw
+[0, 2]
+taxi 1 wins!
 
-FAILED
-********* END OF TEST (time elapsed:7.898927927017212) *********
+PASS
+********* END OF TEST (time elapsed:8.879266023635864) *********
 
 
 
 ********* greedy VS. alphabeta *********
 seed=1234, time_limit=0.5, step_limit=1000
-[0, 6]
+[0, 2]
 taxi 1 wins!
 
 PASS
-********* END OF TEST (time elapsed:8.878598928451538) *********
+********* END OF TEST (time elapsed:8.878720045089722) *********
 
 
 
@@ -97,206 +97,206 @@ seed=1234, time_limit=0.5, step_limit=1000
 draw
 
 FAILED
-********* END OF TEST (time elapsed:8.391692161560059) *********
+********* END OF TEST (time elapsed:7.898664951324463) *********
 
 
 
 ********* improvedgreedy VS. random *********
 seed=1234, time_limit=0.5, step_limit=1000
-[6, 0]
+[10, 0]
 taxi 0 wins!
 
 PASS
-********* END OF TEST (time elapsed:0.06990814208984375) *********
+********* END OF TEST (time elapsed:0.05841779708862305) *********
 
 
 
 ********* improvedgreedy VS. greedy *********
 seed=1234, time_limit=0.5, step_limit=1000
-[6, 0]
+[10, 0]
 taxi 0 wins!
 
 PASS
-********* END OF TEST (time elapsed:0.05817580223083496) *********
+********* END OF TEST (time elapsed:0.05841326713562012) *********
 
 
 
 ********* improvedgreedy VS. minimax *********
 seed=1234, time_limit=0.5, step_limit=1000
-[6, 2]
+[10, 4]
 taxi 0 wins!
 
 FAILED
-********* END OF TEST (time elapsed:8.878973960876465) *********
+********* END OF TEST (time elapsed:11.820852041244507) *********
 
 
 
 ********* improvedgreedy VS. alphabeta *********
 seed=1234, time_limit=0.5, step_limit=1000
-[6, 2]
-taxi 0 wins!
+[0, 2]
+taxi 1 wins!
 
-FAILED
-********* END OF TEST (time elapsed:8.90076494216919) *********
+PASS
+********* END OF TEST (time elapsed:8.880737066268921) *********
 
 
 
 ********* improvedgreedy VS. expectimax *********
 seed=1234, time_limit=0.5, step_limit=1000
-[6, 2]
-taxi 0 wins!
+[0, 2]
+taxi 1 wins!
 
-PASS
-********* END OF TEST (time elapsed:8.934874773025513) *********
+FAILED
+********* END OF TEST (time elapsed:8.880290985107422) *********
 
 
 
 ********* minimax VS. random *********
 seed=1234, time_limit=0.5, step_limit=1000
-[6, 0]
-taxi 0 wins!
+[0, 0]
+draw
 
-PASS
-********* END OF TEST (time elapsed:8.88035774230957) *********
+FAILED
+********* END OF TEST (time elapsed:8.397671937942505) *********
 
 
 
 ********* minimax VS. greedy *********
 seed=1234, time_limit=0.5, step_limit=1000
-[6, 0]
+[2, 0]
 taxi 0 wins!
 
 PASS
-********* END OF TEST (time elapsed:8.881150007247925) *********
+********* END OF TEST (time elapsed:8.878971099853516) *********
 
 
 
 ********* minimax VS. improvedgreedy *********
 seed=1234, time_limit=0.5, step_limit=1000
-[6, 2]
-taxi 0 wins!
+[0, 0]
+draw
 
-PASS
-********* END OF TEST (time elapsed:8.88774299621582) *********
+FAILED
+********* END OF TEST (time elapsed:8.388833045959473) *********
 
 
 
 ********* minimax VS. alphabeta *********
 seed=1234, time_limit=0.5, step_limit=1000
-[6, 2]
-taxi 0 wins!
+[0, 0]
+draw
 
 PASS
-********* END OF TEST (time elapsed:17.70053720474243) *********
+********* END OF TEST (time elapsed:16.718327045440674) *********
 
 
 
 ********* minimax VS. expectimax *********
 seed=1234, time_limit=0.5, step_limit=1000
-[6, 2]
-taxi 0 wins!
+[0, 0]
+draw
 
-PASS
-********* END OF TEST (time elapsed:17.73557710647583) *********
+FAILED
+********* END OF TEST (time elapsed:16.71819281578064) *********
 
 
 
 ********* alphabeta VS. random *********
 seed=1234, time_limit=0.5, step_limit=1000
-[6, 0]
-taxi 0 wins!
+[0, 0]
+draw
 
-PASS
-********* END OF TEST (time elapsed:8.940788984298706) *********
+FAILED
+********* END OF TEST (time elapsed:8.38819408416748) *********
 
 
 
 ********* alphabeta VS. greedy *********
 seed=1234, time_limit=0.5, step_limit=1000
-[6, 0]
-taxi 0 wins!
+[0, 0]
+draw
 
-PASS
-********* END OF TEST (time elapsed:8.886169195175171) *********
+FAILED
+********* END OF TEST (time elapsed:8.388972043991089) *********
 
 
 
 ********* alphabeta VS. improvedgreedy *********
 seed=1234, time_limit=0.5, step_limit=1000
-[6, 2]
-taxi 0 wins!
+[8, 14]
+taxi 1 wins!
 
-PASS
-********* END OF TEST (time elapsed:8.886378049850464) *********
+FAILED
+********* END OF TEST (time elapsed:10.840088844299316) *********
 
 
 
 ********* alphabeta VS. minimax *********
 seed=1234, time_limit=0.5, step_limit=1000
-[6, 2]
-taxi 0 wins!
+[6, 6]
+draw
 
 PASS
-********* END OF TEST (time elapsed:17.70193886756897) *********
+********* END OF TEST (time elapsed:19.671456336975098) *********
 
 
 
 ********* alphabeta VS. expectimax *********
 seed=1234, time_limit=0.5, step_limit=1000
-[6, 2]
-taxi 0 wins!
+[0, 2]
+taxi 1 wins!
 
-PASS
-********* END OF TEST (time elapsed:17.70165705680847) *********
+FAILED
+********* END OF TEST (time elapsed:17.752969980239868) *********
 
 
 
 ********* expectimax VS. random *********
 seed=1234, time_limit=0.5, step_limit=1000
-[6, 0]
-taxi 0 wins!
+[0, 0]
+draw
 
-PASS
-********* END OF TEST (time elapsed:8.878348112106323) *********
+FAILED
+********* END OF TEST (time elapsed:7.8979880809783936) *********
 
 
 
 ********* expectimax VS. greedy *********
 seed=1234, time_limit=0.5, step_limit=1000
-[6, 0]
+[2, 0]
 taxi 0 wins!
 
 PASS
-********* END OF TEST (time elapsed:8.879104852676392) *********
+********* END OF TEST (time elapsed:9.368421077728271) *********
 
 
 
 ********* expectimax VS. improvedgreedy *********
 seed=1234, time_limit=0.5, step_limit=1000
-[6, 2]
-taxi 0 wins!
+[0, 16]
+taxi 1 wins!
 
-PASS
-********* END OF TEST (time elapsed:8.880205154418945) *********
+FAILED
+********* END OF TEST (time elapsed:12.31049394607544) *********
 
 
 
 ********* expectimax VS. minimax *********
 seed=1234, time_limit=0.5, step_limit=1000
-[6, 2]
-taxi 0 wins!
+[0, 2]
+taxi 1 wins!
 
-FAILED
-********* END OF TEST (time elapsed:17.701109886169434) *********
+PASS
+********* END OF TEST (time elapsed:18.683292865753174) *********
 
 
 
 ********* expectimax VS. alphabeta *********
 seed=1234, time_limit=0.5, step_limit=1000
-[6, 2]
-taxi 0 wins!
+[0, 2]
+taxi 1 wins!
 
-PASS
-********* END OF TEST (time elapsed:17.704139947891235) *********
+FAILED
+********* END OF TEST (time elapsed:17.772963762283325) *********
 
-Failed: 5 out of total: 36
+Failed: 13 out of total: 36

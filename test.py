@@ -4,9 +4,7 @@ from time import time
 import re
 import subprocess
 
-from soupsieve import match
-
-
+SEED_MAX = 256
 agents = [  "random",
             "greedy",
             "improvedgreedy",
@@ -140,21 +138,9 @@ def check_results(agent, rival, agent_score, rival_score, winner):
 
     return False
 
+"""
 
 def run_tests():
-    """
-    parser = argparse.ArgumentParser(description='Test your submission by pitting agents against each other.')
-    parser.add_argument('agent0', type=str,
-                        help='First agent')
-    parser.add_argument('agent1', type=str,
-                        help='Second agent')
-    parser.add_argument('-t', '--time_limit', type=float, nargs='?', help='Time limit for each turn in seconds', default=1)
-    parser.add_argument('-c', '--count_steps', nargs='?', type=int, help='Number of steps each taxi gets before game is over',
-                        default=4761)
-    parser.add_argument('--print_game', action='store_true')
-
-    args = parser.parse_args()
-    """ 
     time_limit = 0.5
     seed = 1234
     steps = 1000
@@ -190,7 +176,56 @@ def run_tests():
 
     print(f"\nFailed: {failed} out of total: {total}")
             
+"""
 
+def run_tests():
+    time_limit = 0.5
+    steps = 1000
+
+    total = 0
+    failed = 0
+    for seed in range(SEED_MAX):
+        total += 4
+        start = time()
+        agent = "improvedgreedy"
+        for rival_agent in ["random", "greedy"]:
+            print(f"\n\n\n********* {agent} VS. {rival_agent} *********")
+            print(f"seed={seed}, time_limit={time_limit}, step_limit={steps}")
+            res = subprocess.check_output(f"python main.py {agent} {rival_agent}  -t {time_limit} -s {seed} -c {steps}", shell=True)
+            res = res.decode()
+            print(res)
+            
+            match = re.findall('[0-9]+', res)
+            # Draw or not win
+            if len(match) == 2:
+                failed += 1
+                print("FAILED")
+            elif match[-1] != '0':
+                failed += 1
+                print("FAILED")
+
+            print(f"********* END OF TEST (time elapsed:{time()-start}) *********")
+
+
+            print(f"\n\n\n********* {rival_agent} VS. {agent} *********")
+            print(f"seed={seed}, time_limit={time_limit}, step_limit={steps}")
+            res = subprocess.check_output(f"python main.py {rival_agent} {agent}  -t {time_limit} -s {seed} -c {steps}", shell=True)
+            res = res.decode()
+            print(res)
+
+            match = re.findall('[0-9]+', res)
+            # Draw or not win
+            if len(match) == 2:
+                failed += 1
+                print("FAILED")
+            elif match[-1] != '1':
+                failed += 1
+                print("FAILED")
+
+
+            print(f"********* END OF TEST (time elapsed:{time()-start}) *********")
+
+    print(f"\nFailed: {failed} out of total: {total}")
 
 if __name__ == "__main__":
     run_tests()

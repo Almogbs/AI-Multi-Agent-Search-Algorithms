@@ -9,7 +9,52 @@ MINUS_INF = -sys.maxsize - 1
 TIME_BUFF = 0.01
 
 
+
 def shared_heuristic(env: TaxiEnv, taxi_id: int):
+    taxi = env.get_taxi(taxi_id)
+    other_taxi = env.get_taxi((taxi_id + 1) % 2)
+    have_enough_fule_for_pass = [False, False]
+    max_profit = calculate_max_profit(env, taxi)
+    res = max_profit + taxi.cash
+
+    for i, curr_pass in enumerate(env.passengers):
+        have_enough_fule_for_pass[i] = have_enough_fule(taxi, curr_pass)
+    if taxi.passenger and have_enough_fule(taxi, taxi.passenger):
+        profit = manhattan_distance(taxi.passenger.position, taxi.passenger.destination)
+        res += profit*(taxi.fuel - manhattan_distance(taxi.position, taxi.passenger.destination))
+
+    if True not in have_enough_fule_for_pass and min(env.num_steps // 2, taxi.cash) >= max_profit > other_taxi.cash:
+        res += taxi.fuel - manhattan_distance(taxi.position, closest_gas_position(taxi, env))
+    return res
+
+def have_enough_fule(taxi, passenger):
+    if passenger == taxi.passenger:
+        return manhattan_distance(passenger.position, passenger.destination) <= taxi.fuel
+    return manhattan_distance(taxi.position, passenger.position) +\
+            manhattan_distance(passenger.position, passenger.destination) <= taxi.fuel
+
+def calculate_profit(env: TaxiEnv, taxi, passenger):
+    distance_to_travel = manhattan_distance(passenger.position, passenger.destination)\
+                            + manhattan_distance(taxi.position, passenger.position)
+
+    if distance_to_travel + 2 <= env.num_steps // 2 + 1:
+        return manhattan_distance(passenger.position, passenger.destination)\
+                - manhattan_distance(taxi.position, passenger.position)
+    else:
+        return 0
+
+def calculate_max_profit(env: TaxiEnv, taxi):
+    return max([calculate_profit(env, taxi, passenger) for passenger in env.passengers] + [0])
+
+def closest_gas_position(taxi, env: TaxiEnv):
+    if manhattan_distance(taxi.position, env.gas_stations[0].position)\
+            < manhattan_distance(taxi.position, env.gas_stations[1].position):
+        return env.gas_stations[0].position
+    return env.gas_stations[1].position
+
+
+
+def sshared_heuristic(env: TaxiEnv, taxi_id: int):
     taxi = env.get_taxi(taxi_id)
     other_taxi = env.get_taxi((taxi_id + 1) % 2)
 
@@ -263,6 +308,6 @@ class AgentExpectimax(Agent):
     @staticmethod
     def probabilistic(op):
         if op in ["move north", "move south", "move east", "move west"]:
-            return 1/6
+            return 1/12
         else:
-            return 2/6
+            return 2/12
